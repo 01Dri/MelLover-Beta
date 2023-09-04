@@ -1,87 +1,116 @@
-
-import discord
-from app.entities.Track import Track
-from pytube import YouTube
 import asyncio
 import os
-from dotenv import load_dotenv
+import shutil
+
+import discord
+from pytube import Playlist
+from pytube import YouTube
+from entities.Track import Track
 
 
 class PlayerMusic():
-    load_dotenv()
-
-    def __init__(self)-> None:
+    def __init__(self, ctx):
 
         self.track = None
-        self.track_youtube = None
-        self.voice_channel = None
+        self.ctx = ctx
+        self.playlist_queue_pytube = []
+        self.playlist_songs = []
+        self.pause_status = False
+        self.already_playing = False
+        self.skip_status = False
+        self.voice_channel = ctx.author.voice.channel
         self.voice_client = None
-        self.url = None
-        self.tracks = []
-        self.pause_status = False
-        self.count = 0
+        self.PATH = "C:\\Users\\didvg\\Desktop\\MelLoverOOP\\app"
+        self.i = 0
 
-    async def play_music(self, message):
-        voice_client = await self.verify_voice_connect(message)
-        if voice_client:
-            self.add_track_in_queue(message)
-            self.verify_amount_music_in_queue()
-            await self.download_and_play_music(message, voice_client)
+    def load_songs(self, ctx):
+        parts = ctx.content.split()
+        url = parts[1]
+        if "playlist" in url:
+            self.playlist_queue_pytube = Playlist(url)
+            for track in self.playlist_queue_pytube:
+                self.playlist_songs.append(track)
         else:
-            self.add_track_in_queue(message)
-            self.verify_amount_music_in_queue()
+            self.playlist_songs.append(url)
 
-    async def verify_voice_connect(self, message):
+    def download_music(self, ctx, url):
+        track_api_pytube = YouTube(url)
+        self.track = Track(track_api_pytube.title, track_api_pytube.length, url, ctx.author, ctx.author.display_avatar)
+        audio_stream = YouTube(self.track.url).streams.filter(only_audio=True).first()
+        audio_stream.download(self.get_folder_musics(ctx))
+        audio_source = discord.FFmpegPCMAudio(f'{self.get_folder_musics(ctx)}/{self.track.name}.mp4')
+        return audio_source
+
+    async def play_music(self, ctx):
         try:
-            voice_channel = message.author.voice.channel
-            return await voice_channel.connect()
-        except:
-            return None
+            self.voice_client = await self.voice_channel.connect()
+            self.load_songs(ctx)
+        except Exception as e:
+            print(e)
+            self.load_songs(ctx)
 
-    def get_server_id(self, message):
-        return message.guild.id
-
-    def verify_amount_music_in_queue(self):
-        print("Lista de faixas na fila:")
-        for index, track in enumerate(self.tracks, start=1):
-            print(f"{index}. {track.name}")
-        print(f"Total de faixas na fila: {len(self.tracks)}")
-
-    def add_track_in_queue(self, message):
-        parts_message = message.content.split()
-        url_message = parts_message[1]
-        track_for_pytube_api = YouTube(url_message)
-        self.track = Track(track_for_pytube_api.title, track_for_pytube_api.length, url_message)
-        self.tracks.append(self.track)
-
-    async def download_and_play_music(self, message, voice_client):
-        while self.tracks:
-
-            audio_stream = YouTube(self.track.url).streams.filter(only_audio=True).first()
-            id_server = self.get_server_id(message)
-            audio_stream.download(filename=f'{id_server}.mp4')
-            source = f'{id_server}.mp4'
-            play_source = discord.FFmpegPCMAudio(f'{source}')
-            voice_client.play(play_source)
-            self.count += 1
-            while voice_client.is_playing() or self.pause_status:
-                await asyncio.sleep(1)
-            if self.count == len(self.tracks):
+        while self.playlist_songs:
+            await self.verify_status()
+            try:
+                if not self.skip_status:
+                    self.voice_client.play(self.download_music(ctx, self.playlist_songs[self.i]))
+                    self.i += 1
+                else:
+                    self.skip_status = False
+                    break
+            except Exception as e:
+                print(e)
+                await asyncio.sleep(180)
                 break
+        await self.disconnect_for_away(ctx)
 
-        await asyncio.sleep(120)
-        await voice_client.disconnect()
-        await asyncio.sleep(10)
-        server_id = self.get_server_id(message)
-        os.remove(f'{server_id}.mp4')
-
-    async def pause_music(self, voice_client):
+    def pause(self):
+        self.voice_client.pause()
         self.pause_status = True
-        if self.pause_status:
-            await voice_client.pause()
 
-    async def resume_music(self, voice_client):
+    def resume(self):
+        self.voice_client.resume()
         self.pause_status = False
-        await voice_client.resume()
 
+    def skip(self):
+        self.voice_client.stop()
+        self.skip_status = True
 
+    async def stop(self, ctx):
+        await self.disconnect(ctx)
+        self.pause_status = False
+        self.already_playing = False
+
+    async def verify_status(self):
+        while self.pause_status or self.voice_client.is_playing():
+            await asyncio.sleep(1)
+
+        self.pause_status = False
+        self.already_playing = False
+        return False
+
+    async def disconnect_for_away(self, ctx):
+        if not self.voice_client.is_playing():
+            await asyncio.sleep(180)
+            await self.disconnect(ctx)
+
+        self.pause_status = False
+        self.already_playing = False
+        return False
+
+    async def disconnect(self, ctx):
+        self.voice_client.stop()
+        await self.voice_client.disconnect()
+        self.playlist_songs.clear()
+        self.i = 0
+        self.pause_status = False
+        await asyncio.sleep(10)
+        self.remove_mp4_files(ctx)
+
+    def remove_mp4_files(self, ctx):
+        shutil.rmtree(self.get_folder_musics(ctx))
+
+    def get_folder_musics(self, ctx):
+        folder_for_musics = f"{ctx.guild.id}"
+        folder_for_musics_path = os.path.join(self.PATH, folder_for_musics)
+        return folder_for_musics_path
