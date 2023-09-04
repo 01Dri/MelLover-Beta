@@ -53,11 +53,12 @@ class PlayerMusic():
             await self.verify_status()
             try:
                 if not self.skip_status:
+                    print(self.playlist_songs)
+                    print(f"Musica atual: {self.playlist_songs[self.i]}")
                     self.voice_client.play(self.download_music(ctx, self.playlist_songs[self.i]))
                     self.i += 1
                 else:
                     self.skip_status = False
-                    break
             except Exception as e:
                 print(e)
                 await asyncio.sleep(180)
@@ -104,7 +105,7 @@ class PlayerMusic():
         self.playlist_songs.clear()
         self.i = 0
         self.pause_status = False
-        await asyncio.sleep(10)
+        await asyncio.sleep(2)
         self.remove_mp4_files(ctx)
 
     def remove_mp4_files(self, ctx):
