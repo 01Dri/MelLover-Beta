@@ -5,16 +5,18 @@ import discord
 
 from pytube import Playlist
 from pytube import YouTube
+
+from constants.Contants import PATH_FOLDER_MUSICS
 from entities.Track import Track
 from entities.PlaylistEntity import PlaylistEntity
-from embeds.Embeds import EmbedsCustom
 
 
 class PlayerMusic:
     def __init__(self, ctx):
 
-        self.track = None
-        self.playlist_entity= None
+        self.track_entity = None
+        self.track_by_pytube = None
+        self.playlist_entity = None
         self.ctx = ctx
         self.playlist_queue_pytube = None
         self.playlist_songs = []
@@ -23,13 +25,11 @@ class PlayerMusic:
         self.skip_status = False
         self.voice_channel = ctx.author.voice.channel
         self.voice_client = None
-        self.PATH = "C:\\Users\\didvg\\Desktop\\MelLoverOOP\\app"
+        self.PATH = PATH_FOLDER_MUSICS
         self.i = 0
-        self.embeds = EmbedsCustom()
         self.embed_playlist = None
         self.playlist_status = False
         self.music_unit_status = False
-
 
     def load_songs(self, ctx):
         parts = ctx.content.split()
@@ -38,48 +38,50 @@ class PlayerMusic:
             self.playlist_queue_pytube = Playlist(url)
             self.music_unit_status = False
             self.playlist_status = True
+            try:
+                playlist_desc = self.playlist_queue_pytube.description
+            except:
+                playlist_desc = "Sem descrição"
 
+            self.playlist_entity = PlaylistEntity(self.playlist_queue_pytube.title,
+                                                  self.playlist_queue_pytube.length,
+                                                  "teste", "teste", playlist_desc)
             for track in self.playlist_queue_pytube:
                 self.playlist_songs.append(track)
         else:
             self.playlist_status = False
             self.music_unit_status = True
+            self.track_by_pytube = YouTube(url)
+            self.track_entity = Track(self.track_by_pytube.title, self.track_by_pytube.length,
+                                      1, ctx.author, ctx.author.display_avatar)
             self.playlist_songs.append(url)
 
     def download_music(self, ctx, url):
         track_api_pytube = YouTube(url)
-        self.track = Track(track_api_pytube.title, track_api_pytube.length, url, ctx.author, ctx.author.display_avatar)
-        audio_stream = YouTube(self.track.url).streams.filter(only_audio=True).first()
+        self.track_entity = Track(track_api_pytube.title, track_api_pytube.length, url, ctx.author,
+                                  ctx.author.display_avatar)
+        audio_stream = YouTube(self.track_entity.url).streams.filter(only_audio=True).first()
         audio_stream.download(self.get_folder_musics(ctx))
-        audio_source = discord.FFmpegPCMAudio(f'{self.get_folder_musics(ctx)}/{self.track.name}.mp4')
+        audio_source = discord.FFmpegPCMAudio(f'{self.get_folder_musics(ctx)}\\{audio_stream.default_filename}')
         return audio_source
 
     async def play_music(self, ctx):
-        try:
-            self.voice_client = await self.voice_channel.connect()
-            self.load_songs(ctx)
-        except Exception as e:
-            print(e)
-            self.load_songs(ctx)
-
+        await self.verify_how_to_use_embed(ctx)
+        await self.connect_bot_and_load_songs(ctx)
         while self.playlist_songs:
-            if self.playlist_status:
-                self.playlist_entity = PlaylistEntity(self.playlist_queue_pytube.title, self.playlist_queue_pytube.length, self.playlist_queue_pytube.description, "teste", "teste")
-                await ctx.reply(embed=self.playlist_entity.get_embed_response())
-
             await self.verify_status()
-
             try:
                 if not self.skip_status:
-                    print(self.playlist_songs)
-                    print(f"Musica atual: {self.playlist_songs[self.i]}")
                     self.voice_client.play(self.download_music(ctx, self.playlist_songs[self.i]))
+                    await ctx.channel.send(embed=self.track_entity.get_embed_for_track_current())
                     self.i += 1
                 else:
                     self.skip_status = False
-            except Exception as e:
+
+            except discord.DiscordException as e:
                 print(e)
                 await asyncio.sleep(180)
+
                 break
         await self.disconnect_for_away(ctx)
 
@@ -134,4 +136,15 @@ class PlayerMusic:
         folder_for_musics_path = os.path.join(self.PATH, folder_for_musics)
         return folder_for_musics_path
 
+    async def verify_how_to_use_embed(self, ctx):
+        if self.playlist_status:
+            await ctx.channel.send(embed=self.playlist_entity.get_embed_response())
+        elif self.music_unit_status:
+            await ctx.channel.send(embed=self.track_entity.get_embed_for_track())
 
+    async def connect_bot_and_load_songs(self, ctx):
+        try:
+            self.voice_client = await self.voice_channel.connect()
+            self.load_songs(ctx)
+        except discord.DiscordException:
+            self.load_songs(ctx)

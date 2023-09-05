@@ -29,8 +29,6 @@ class DiscordBot(discord.Client):
 
     @client.event
     async def on_message(self, message):
-        author_voice_state = message.author.voice
-        voice_client = author_voice_state.channel.guild.voice_client
         if message.author == self.client.user:
             return
 

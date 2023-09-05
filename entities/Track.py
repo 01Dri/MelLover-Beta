@@ -1,3 +1,6 @@
+from embeds.Embeds import create_embed_for_music_unit, create_embed_for_music_current
+
+
 class Track():
 
     def __init__(self, name, time, url, name_discord, url_image_discord) -> None:
@@ -8,3 +11,8 @@ class Track():
         self.url_image_discord = url_image_discord
         pass
 
+    def get_embed_for_track(self):
+        return create_embed_for_music_unit(self.name, self.name_discord)
+
+    def get_embed_for_track_current(self):
+        return create_embed_for_music_current(self.name, self.name_discord)

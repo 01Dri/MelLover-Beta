@@ -1,12 +1,14 @@
-from embeds.Embeds import EmbedsCustom
+from embeds.Embeds import create_embed_for_playlist_music
+
+
 class PlaylistEntity:
 
-    def __init__(self, title, length, description, track, author):
+    def __init__(self, title, length, track, author, description):
         self.title = title
         self.length = length
-        self.description = description
         self.track = track
         self.author = author
-        self.embed = EmbedsCustom()
+        self.description = description
+
     def get_embed_response(self):
-        return self.embed.create_embed_for_playlist_music(self.title, self.length, self.description)
+        return create_embed_for_playlist_music(self.title, self.length, self.description)
