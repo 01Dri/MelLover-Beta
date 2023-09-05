@@ -1,19 +1,22 @@
 import asyncio
 import os
 import shutil
-
 import discord
+
 from pytube import Playlist
 from pytube import YouTube
 from entities.Track import Track
+from entities.PlaylistEntity import PlaylistEntity
+from embeds.Embeds import EmbedsCustom
 
 
-class PlayerMusic():
+class PlayerMusic:
     def __init__(self, ctx):
 
         self.track = None
+        self.playlist_entity= None
         self.ctx = ctx
-        self.playlist_queue_pytube = []
+        self.playlist_queue_pytube = None
         self.playlist_songs = []
         self.pause_status = False
         self.already_playing = False
@@ -22,15 +25,25 @@ class PlayerMusic():
         self.voice_client = None
         self.PATH = "C:\\Users\\didvg\\Desktop\\MelLoverOOP\\app"
         self.i = 0
+        self.embeds = EmbedsCustom()
+        self.embed_playlist = None
+        self.playlist_status = False
+        self.music_unit_status = False
+
 
     def load_songs(self, ctx):
         parts = ctx.content.split()
         url = parts[1]
         if "playlist" in url:
             self.playlist_queue_pytube = Playlist(url)
+            self.music_unit_status = False
+            self.playlist_status = True
+
             for track in self.playlist_queue_pytube:
                 self.playlist_songs.append(track)
         else:
+            self.playlist_status = False
+            self.music_unit_status = True
             self.playlist_songs.append(url)
 
     def download_music(self, ctx, url):
@@ -50,7 +63,12 @@ class PlayerMusic():
             self.load_songs(ctx)
 
         while self.playlist_songs:
+            if self.playlist_status:
+                self.playlist_entity = PlaylistEntity(self.playlist_queue_pytube.title, self.playlist_queue_pytube.length, self.playlist_queue_pytube.description, "teste", "teste")
+                await ctx.reply(embed=self.playlist_entity.get_embed_response())
+
             await self.verify_status()
+
             try:
                 if not self.skip_status:
                     print(self.playlist_songs)
@@ -115,3 +133,5 @@ class PlayerMusic():
         folder_for_musics = f"{ctx.guild.id}"
         folder_for_musics_path = os.path.join(self.PATH, folder_for_musics)
         return folder_for_musics_path
+
+
