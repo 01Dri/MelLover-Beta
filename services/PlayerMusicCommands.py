@@ -65,7 +65,6 @@ class PlayerMusic:
         print(self.get_folder_musics(ctx))
         audio_stream.download(self.get_folder_musics(ctx))
         print(audio_stream.default_filename)
-        os.environ["DISPLAY"] = ":0"
         audio_source = discord.FFmpegPCMAudio(os.path.join(self.get_folder_musics(ctx), audio_stream.default_filename))
         return audio_source
 
