@@ -61,7 +61,6 @@ class PlayerMusic:
         self.track_entity = Track(track_api_pytube.title, track_api_pytube.length, url, ctx.author,
                                   ctx.author.display_avatar)
         audio_stream = YouTube(self.track_entity.url).streams.filter(only_audio=True).first()
-        await asyncio.sleep(5)
         print(self.get_folder_musics(ctx))
         audio_stream.download(self.get_folder_musics(ctx))
         print(audio_stream.default_filename)
@@ -77,7 +76,6 @@ class PlayerMusic:
                 if not self.skip_status:
                     print(self.playlist_songs)
                     self.voice_client.play(await self.download_music(ctx, self.playlist_songs[self.i]))
-                    await asyncio.sleep(2)
                     await ctx.channel.send(embed=self.track_entity.get_embed_for_track_current())
                     self.i += 1
                 else:
