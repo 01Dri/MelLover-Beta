@@ -2,16 +2,17 @@ import os
 from typing import Any
 import discord
 from discord.flags import Intents
-from services.PlayerMusic import PlayerMusic
+from services.PlayerMusicCommands import PlayerMusic
+from services.LolServicesCommands import LolServices
 from dotenv import load_dotenv
 from discord import app_commands
-
 
 
 class DiscordBot(discord.Client):
 
     def __init__(self, *, intents: Intents, **options: Any) -> None:
         self.servers = {}
+        self.user_lol_services = {}
         self.intents = discord.Intents.default()
         self.intents.message_content = True
         self.client = discord.Client(intents=intents)
@@ -65,6 +66,13 @@ class DiscordBot(discord.Client):
                 self.servers[guild_id] = PlayerMusic(message)
             server = self.servers[guild_id]
             server.skip()
+
+        if message.content.startswith("!contalol"):
+            user_id = message.author.id
+            if user_id not in self.user_lol_services:
+                self.user_lol_services[user_id] = LolServices(message)
+            user_lol_service = self.user_lol_services[user_id]
+            await user_lol_service.get_view_account_for_nick(message)
 
 
 load_dotenv()

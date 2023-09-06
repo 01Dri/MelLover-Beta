@@ -1,5 +1,5 @@
 import unittest
-from services.PlayerMusic import PlayerMusic
+from services.PlayerMusicCommands import PlayerMusic
 
 
 class PlayerMusicTest(unittest.TestCase):

@@ -37,8 +37,6 @@ def get_account_league(nick):
         dados = ["Sem elo", "Sem elo", nick_in_game, level, op_gg_account]
         return dados
 
-
-
 def get_level_account(nick):
     api_account_informations = f'https://br1.api.riotgames.com/lol/summoner/v4/summoners/by-name/{nick}?api_key={TOKEN_RIOT}'
     response_api = requests.get(api_account_informations)
@@ -66,5 +64,3 @@ def get_winrate_account_league(nick):
     except:
         return 0
 
-
-print(get_account_league("pijack"))
