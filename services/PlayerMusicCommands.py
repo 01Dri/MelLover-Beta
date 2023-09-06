@@ -65,7 +65,7 @@ class PlayerMusic:
         print(self.get_folder_musics(ctx))
         audio_stream.download(self.get_folder_musics(ctx))
         print(audio_stream.default_filename)
-        audio_source = discord.FFmpegPCMAudio(os.path.join(self.get_folder_musics(ctx), audio_stream.default_filename), options='-vn')
+        audio_source = discord.FFmpegPCMAudio(os.path.join(self.get_folder_musics(ctx), audio_stream.default_filename), options='-vn -f alsa -ac 2 -ar 48000')
         return audio_source
 
     async def play_music(self, ctx):
