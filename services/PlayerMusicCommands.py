@@ -66,8 +66,8 @@ class PlayerMusic:
         return audio_source
 
     async def play_music(self, ctx):
-        await self.verify_how_to_use_embed(ctx)
         await self.connect_bot_and_load_songs(ctx)
+        await self.verify_how_to_use_embed(ctx)
         while self.playlist_songs:
             await self.verify_status()
             try:

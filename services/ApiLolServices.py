@@ -3,7 +3,7 @@ from constants.Contants import TOKEN_RIOT
 
 def get_account_id_league(nick):
 
-    api_account_informations  = f'https://br1.api.riotgames.com/lol/summoner/v4/summoners/by-name/{nick }?api_key={TOKEN_RIOT}'
+    api_account_informations = f'https://br1.api.riotgames.com/lol/summoner/v4/summoners/by-name/{nick }?api_key={TOKEN_RIOT}'
     response_api = requests.get(api_account_informations)
     if response_api.status_code != 200:
         print("Erro na requisição")
@@ -14,6 +14,7 @@ def get_account_league(nick):
     tier = ""
     league = ""
     level = ""
+    pdl = 0
     op_gg_account = f"https://www.op.gg/summoners/br/{nick}"
     winrate = 0
     api_elo_info = f"https://br1.api.riotgames.com/lol/league/v4/entries/by-summoner/{get_account_id_league(nick)}?api_key={TOKEN_RIOT}"
@@ -24,18 +25,18 @@ def get_account_league(nick):
             if item.get('queueType') == 'RANKED_SOLO_5x5':
                 tier = item.get('tier')
                 league = item.get('rank')
+                pdl = item.get('leaguePoints')
                 break
 
         nick_in_game = response_api_json[0]['summonerName']
         level = get_level_account(nick)
         winrate = get_winrate_account_league(nick)
-        account = [nick_in_game, tier, league, level, winrate, op_gg_account]
+        account = [nick_in_game, tier, league,level, winrate, pdl, op_gg_account]
         return account
 
     except:
-        nick_in_game = response_api_json[0]['summonerName']
         level = get_level_account(nick)
-        dados = ["Sem elo", "Sem elo", nick_in_game, level, op_gg_account]
+        dados = [nick, "", "Sem elo", level, winrate, 0, op_gg_account]
         return dados
 
 def get_level_account(nick):
