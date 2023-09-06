@@ -6,7 +6,7 @@ import discord
 from pytube import Playlist
 from pytube import YouTube
 
-from constants.Contants import PATH_FOLDER_MUSICS
+from constants.Contants import DEFAULT_PATH
 from entities.Track import Track
 from entities.PlaylistEntity import PlaylistEntity
 
@@ -25,7 +25,7 @@ class PlayerMusic:
         self.skip_status = False
         self.voice_channel = ctx.author.voice.channel
         self.voice_client = None
-        self.PATH = PATH_FOLDER_MUSICS
+        self.PATH = DEFAULT_PATH
         self.i = 0
         self.embed_playlist = None
         self.playlist_status = False
@@ -56,11 +56,13 @@ class PlayerMusic:
                                       1, ctx.author, ctx.author.display_avatar)
             self.playlist_songs.append(url)
 
-    def download_music(self, ctx, url):
+    async def download_music(self, ctx, url):
         track_api_pytube = YouTube(url)
         self.track_entity = Track(track_api_pytube.title, track_api_pytube.length, url, ctx.author,
                                   ctx.author.display_avatar)
         audio_stream = YouTube(self.track_entity.url).streams.filter(only_audio=True).first()
+        await asyncio.sleep(5)
+        print(self.get_folder_musics(ctx))
         audio_stream.download(self.get_folder_musics(ctx))
         audio_source = discord.FFmpegPCMAudio(f'{self.get_folder_musics(ctx)}\\{audio_stream.default_filename}')
         return audio_source
@@ -72,7 +74,9 @@ class PlayerMusic:
             await self.verify_status()
             try:
                 if not self.skip_status:
-                    self.voice_client.play(self.download_music(ctx, self.playlist_songs[self.i]))
+                    print(self.playlist_songs)
+                    self.voice_client.play(await self.download_music(ctx, self.playlist_songs[self.i]))
+                    await asyncio.sleep(2)
                     await ctx.channel.send(embed=self.track_entity.get_embed_for_track_current())
                     self.i += 1
                 else:
@@ -131,9 +135,11 @@ class PlayerMusic:
     def remove_mp4_files(self, ctx):
         shutil.rmtree(self.get_folder_musics(ctx))
 
+
     def get_folder_musics(self, ctx):
         folder_for_musics = f"{ctx.guild.id}"
         folder_for_musics_path = os.path.join(self.PATH, folder_for_musics)
+
         return folder_for_musics_path
 
     async def verify_how_to_use_embed(self, ctx):
