@@ -11,8 +11,6 @@ from discord import app_commands
 class DiscordBot(discord.Client):
 
     def __init__(self, *, intents: Intents, **options: Any) -> None:
-        self.servers = {}
-        self.user_lol_services = {}
         self.intents = discord.Intents.default()
         self.intents.message_content = True
         self.client = discord.Client(intents=intents)
@@ -29,50 +27,32 @@ class DiscordBot(discord.Client):
 
     @client.event
     async def on_message(self, message):
+        global player
         if message.author == self.client.user:
             return
 
         if message.content.startswith("!play"):
-            guild_id = message.guild.id
-            if guild_id not in self.servers:
-                self.servers[guild_id] = PlayerMusic(message)
-            server = self.servers[guild_id]
-            await server.play_music(message)
+            player = PlayerMusic(message)
+            await player.play_music(message)
 
         if message.content.startswith("!pause"):
-            guild_id = message.guild.id
-            if guild_id not in self.servers:
-                self.servers[guild_id] = PlayerMusic(message)
-            server = self.servers[guild_id]
-            server.pause()
+            player.pause()
 
         if message.content.startswith("!resume"):
-            guild_id = message.guild.id
-            if guild_id not in self.servers:
-                self.servers[guild_id] = PlayerMusic(message)
-            server = self.servers[guild_id]
-            server.resume()
+            player.resume()
 
         if message.content.startswith("!stop"):
-            guild_id = message.guild.id
-            if guild_id not in self.servers:
-                self.servers[guild_id] = PlayerMusic(message)
-            server = self.servers[guild_id]
-            await server.stop(message)
+            player.resume()
 
         if message.content.startswith("!skip"):
-            guild_id = message.guild.id
-            if guild_id not in self.servers:
-                self.servers[guild_id] = PlayerMusic(message)
-            server = self.servers[guild_id]
-            server.skip()
+            player.skip()
+
+        if message.content.startswith("!stop"):
+            await player.stop(message)
 
         if message.content.startswith("!contalol"):
-            user_id = message.author.id
-            if user_id not in self.user_lol_services:
-                self.user_lol_services[user_id] = LolServices(message)
-            user_lol_service = self.user_lol_services[user_id]
-            await user_lol_service.get_view_account_for_nick(message)
+            user_lol_services = LolServices(message)
+            await user_lol_services.get_view_account_for_nick(message)
 
 
 load_dotenv()
