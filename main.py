@@ -1,9 +1,8 @@
 import os
 from typing import Any
 import discord
-from discord.app_commands import tree
 from discord.flags import Intents
-from entities.PlayerMusic import PlayerMusic
+from services.PlayerMusic import PlayerMusic
 from dotenv import load_dotenv
 from discord import app_commands
 

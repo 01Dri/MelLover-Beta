@@ -1,5 +1,5 @@
 import unittest
-from entities.PlayerMusic import PlayerMusic
+from services.PlayerMusic import PlayerMusic
 
 
 class PlayerMusicTest(unittest.TestCase):
