@@ -64,7 +64,8 @@ class PlayerMusic:
         await asyncio.sleep(5)
         print(self.get_folder_musics(ctx))
         audio_stream.download(self.get_folder_musics(ctx))
-        audio_source = discord.FFmpegPCMAudio(f'{self.get_folder_musics(ctx)}\\{audio_stream.default_filename}', options='-vn')
+        print(audio_stream.default_filename)
+        audio_source = discord.FFmpegPCMAudio(os.path.join(self.get_folder_musics(ctx), audio_stream.default_filename), options='-vn')
         return audio_source
 
     async def play_music(self, ctx):
