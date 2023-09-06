@@ -3,7 +3,7 @@
 ![Ícone do MelLoverBot](https://images2.imgbox.com/25/2b/RAG4qLwk_o.jpg)
 
 ## Sobre o Projeto ℹ️
-## IMPORTES: O PROJETO ESTÁ EM FASE BETA!
+## IMPORTANTE: O PROJETO ESTÁ EM FASE BETA!
 
 O MelLoverBot é um bot de Discord desenvolvido para a minha namorada, para que ela possa aproveitar as funcionalidades que desejar.
 
