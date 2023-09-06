@@ -1,4 +1,4 @@
-
+import urllib.parse
 from entities.AccountLoL import AccountLoL
 from entities.DiscordAccount import DiscordAccount
 from services.ApiLolServices import get_account_league
@@ -21,9 +21,10 @@ class LolServices:
 
     async def get_view_account_for_nick(self, ctx):
         parts = ctx.content.split()
-        self.nick = parts[1]
+        if len(parts) > 1 and parts[0] == "!contalol":
+            self.nick = urllib.parse.quote(" ".join(parts[1:]))
         self.get_account_league_info()
-        if self.nick != " " or self.nick is None:
+        if self.nick != " " or self.nick is not None:
             self.account_lol = AccountLoL(self.nick_in_game, self.level, self.league, self.tier, self.winrate, self.op_gg_account, self.account_discord)
             await ctx.reply(embed=self.account_lol.get_embed_for_account_league())
 

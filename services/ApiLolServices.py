@@ -2,7 +2,8 @@ import requests
 from constants.Contants import TOKEN_RIOT
 
 def get_account_id_league(nick):
-    api_account_informations  = f'https://br1.api.riotgames.com/lol/summoner/v4/summoners/by-name/{nick}?api_key={TOKEN_RIOT}'
+
+    api_account_informations  = f'https://br1.api.riotgames.com/lol/summoner/v4/summoners/by-name/{nick }?api_key={TOKEN_RIOT}'
     response_api = requests.get(api_account_informations)
     if response_api.status_code != 200:
         print("Erro na requisição")
@@ -48,6 +49,7 @@ def get_winrate_account_league(nick):
     wins = 0
     losses = 0
     id_league = get_account_id_league(nick)
+
     api_account_informations = f"https://br1.api.riotgames.com/lol/league/v4/entries/by-summoner/{id_league}?api_key={TOKEN_RIOT}"
     response_api = requests.get(api_account_informations)
     response_api_json = response_api.json()
