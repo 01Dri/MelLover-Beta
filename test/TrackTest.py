@@ -1,5 +1,5 @@
 import unittest
-from app.entities.Track import Track
+from entities.Track import Track
 
 
 class TrackTests(unittest.TestCase):

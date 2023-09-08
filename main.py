@@ -14,6 +14,7 @@ class DiscordBot(discord.Client):
         self.intents = discord.Intents.default()
         self.intents.message_content = True
         self.client = discord.Client(intents=intents)
+        self.guid_musicas = {}
         super().__init__(intents=intents, **options)
 
     intents = discord.Intents.default()
@@ -31,24 +32,24 @@ class DiscordBot(discord.Client):
         if message.author == self.client.user:
             return
 
+        if isinstance(message.channel, discord.TextChannel):
+            if message.guild.id not in self.guid_musicas:
+                self.guid_musicas[message.guild.id] = PlayerMusic(message.guild.id)
+
         if message.content.startswith("!play"):
-            player = PlayerMusic(message)
-            await player.play_music(message)
+            await self.guid_musicas[message.guild.id].play_music(message)
 
         if message.content.startswith("!pause"):
-            player.pause()
+            await self.guid_musicas[message.guild.id].pause(message)
 
         if message.content.startswith("!resume"):
-            player.resume()
-
-        if message.content.startswith("!stop"):
-            player.resume()
+            await self.guid_musicas[message.guild.id].resume(message)
 
         if message.content.startswith("!skip"):
-            player.skip()
+            await self.guid_musicas[message.guild.id].skip(message)
 
         if message.content.startswith("!stop"):
-            await player.stop(message)
+            await self.guid_musicas[message.guild.id].stop(message)
 
         if message.content.startswith("!contalol"):
             user_lol_services = LolServices(message)

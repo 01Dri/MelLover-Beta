@@ -1,7 +1,7 @@
 import discord
 
 from constants.Contants import COLOR_FOR_EMBEDS
-
+from constants.Contants import COLOR_FOR_EMBEDS_ERROR
 
 def create_embed_for_playlist_music(title, length, description):
     embed = discord.Embed(title="Mel Musicas", color=COLOR_FOR_EMBEDS)
@@ -36,3 +36,38 @@ def create_embed_for_account_league(nick, league, tier, level, winrate,pdl, op_g
     embed.add_field(name="OPGG", value=op_gg, inline=False)
     embed.set_image(url="https://files.tecnoblog.net/wp-content/uploads/2019/05/league-of-legends-700x394.jpg")
     return embed
+
+
+def create_embed_for_error_link_music():
+    embed = discord.Embed(title="Mel Musicas", color=COLOR_FOR_EMBEDS_ERROR)
+    embed.add_field(name="ERRO: ", value="Link informado é inválido!", inline=False)
+    return embed
+
+def create_embed_for_error_voice_connect():
+    embed = discord.Embed(title="Mel Musicas", color=COLOR_FOR_EMBEDS_ERROR)
+    embed.add_field(name="ERRO: ", value="**Você precisa estar conectado em um canal de voz para usar esse comando!**", inline=False)
+    return embed
+
+def create_embed_for_skip(next_music):
+    embed = discord.Embed(title="Mel Musicas", color=COLOR_FOR_EMBEDS)
+    embed.add_field(name=f"Próxima na fila é: **{next_music}**", value=f"", inline=False)
+    return embed
+
+def create_embed_for_pause():
+    embed = discord.Embed(title="Mel Musicas", color=COLOR_FOR_EMBEDS)
+    embed.add_field(name=f"Músicas pausada!", value=f"", inline=True)
+    return embed
+
+def create_embed_for_resume():
+    embed = discord.Embed(title="Mel Musicas", color=COLOR_FOR_EMBEDS)
+    embed.add_field(name=f"Música retomada!", value=f"", inline=True)
+    return embed
+
+def create_embed_for_stop():
+    embed = discord.Embed(title="Mel Musicas", color=COLOR_FOR_EMBEDS)
+    embed.add_field(name=f"Até a próxima!!!", value="", inline=True)
+    return embed
+
+
+
+
