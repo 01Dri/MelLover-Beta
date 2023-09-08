@@ -69,5 +69,9 @@ def create_embed_for_stop():
     return embed
 
 
+def create_embed_for_error_account_invalid_league(nick):
+    embed = discord.Embed(title="League of legends Account", color=COLOR_FOR_EMBEDS_ERROR)
+    embed.add_field(name="ERRO: ", value=f'Nick **{nick}** não existe no sistema.', inline=False)
+    return embed
 
 
