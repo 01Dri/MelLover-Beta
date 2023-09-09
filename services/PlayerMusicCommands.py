@@ -1,7 +1,7 @@
 import asyncio
-import os
-import shutil
 import discord
+
+from services.DownloaderMusics import DownloadMusics
 
 from pytube import Playlist
 from pytube import YouTube
@@ -21,6 +21,7 @@ from embeds.Embeds import create_embed_for_skip
 from embeds.Embeds import create_embed_for_pause
 from embeds.Embeds import create_embed_for_resume
 from embeds.Embeds import create_embed_for_stop
+
 
 class PlayerMusic:
     def __init__(self, ctx):
@@ -42,6 +43,8 @@ class PlayerMusic:
         self.playlist_status = False
         self.music_unit_status = False
         self.download_fail = True
+        self.downloader = None
+
 
     async def load_songs(self, ctx):
         global playlist_desc
@@ -60,9 +63,8 @@ class PlayerMusic:
                     except:
                         playlist_desc = "Sem descrição"
                     self.playlist_entity = PlaylistEntity(self.playlist_queue_pytube.title,
-                                                  self.playlist_queue_pytube.length,
-                                                  "teste", "teste", playlist_desc)
-                            
+                                                          self.playlist_queue_pytube.length,
+                                                          "teste", "teste", playlist_desc)
                     for track in self.playlist_queue_pytube:
                         self.playlist_songs.append(track)
                         self.download_fail = False
@@ -70,8 +72,7 @@ class PlayerMusic:
                     print("Link inválido")
                     self.download_fail = True
                     await ctx.reply(embed=create_embed_for_error_link_music())
-                    
-          
+
             if LINK_MUSIC_UNIT_FOR_YOUTUBE in url:
                 print("passou aq")
                 self.playlist_status = False
@@ -79,7 +80,7 @@ class PlayerMusic:
                 try:
                     self.track_by_pytube = YouTube(url)
                     self.track_entity = Track(self.track_by_pytube.title, self.track_by_pytube.length,
-                                            1, ctx.author, ctx.author.display_avatar)
+                                              url, ctx.author, ctx.author.display_avatar)
                     self.playlist_songs.append(url)
                     self.download_fail = False
 
@@ -89,19 +90,7 @@ class PlayerMusic:
                     await ctx.reply(embed=create_embed_for_error_link_music())
         else:
             await ctx.reply(embed=create_embed_for_error_link_music())
-                    
-        
-        
-    async def download_music(self, ctx, url):
-            track_api_pytube = YouTube(url)
-            self.track_entity = Track(track_api_pytube.title, track_api_pytube.length, url, ctx.author,
-                                    ctx.author.display_avatar)
-            audio_stream = YouTube(self.track_entity.url).streams.filter(only_audio=True).first()
-            audio_stream.download(await self.get_folder_musics(ctx))
-            print(audio_stream.default_filename)
-            audio_source = discord.FFmpegPCMAudio(os.path.join(await self.get_folder_musics(ctx), audio_stream.default_filename))
-            return audio_source
-    
+
     async def connect_bot_and_load_songs(self, ctx):
         if ctx.author.voice is None or ctx.author.voice.channel is None:
             await ctx.reply(embed=create_embed_for_error_voice_connect())
@@ -114,6 +103,7 @@ class PlayerMusic:
                 await self.load_songs(ctx)
         return
 
+
     async def verify_status(self):
         while self.pause_status or self.voice_client.is_playing():
             await asyncio.sleep(1)
@@ -122,20 +112,19 @@ class PlayerMusic:
         self.already_playing = False
         return False
 
-
     async def play_music(self, ctx):
         await self.connect_bot_and_load_songs(ctx)
         await self.verify_how_to_use_embed(ctx)
         while self.playlist_songs:
-            try:
-                file = await self.download_music(ctx, self.playlist_songs[self.i])
-            except:
-                return
+            self.downloader = DownloadMusics(self.track_entity.url, ctx)
+            print(self.track_entity.url)
+            file = await self.downloader.download_music_for_youtube()
+            print(file)
             try:
                 if not self.skip_status:
                     await asyncio.sleep(2)
                     self.voice_client.play(file)
-                    self.i += 1  
+                    self.i += 1
                     if self.track_entity is None:
                         return
                     else:
@@ -148,6 +137,7 @@ class PlayerMusic:
                 print(e)
                 await asyncio.sleep(180)
                 break
+
     async def pause(self, ctx):
 
         self.voice_client.pause()
@@ -163,14 +153,12 @@ class PlayerMusic:
         self.voice_client.stop()
         self.skip_status = True
         await ctx.reply(embed=create_embed_for_skip(self.track_entity.name))
-        
 
     async def stop(self, ctx):
         await self.disconnect(ctx)
         self.pause_status = False
         self.already_playing = False
         await ctx.reply(embed=create_embed_for_stop())
-
 
     async def disconnect_for_away(self, ctx):
         if self.voice_client == None:
@@ -189,22 +177,13 @@ class PlayerMusic:
         self.i = 0
         self.pause_status = False
         await asyncio.sleep(2)
-        await self.remove_mp4_files(ctx)
+        await self.downloader.remove_mp4_files(ctx)
 
-    async def remove_mp4_files(self, ctx):
-        shutil.rmtree(await self.get_folder_musics(ctx))
-
-
-    async def get_folder_musics(self, ctx):
-        folder_for_musics = f"{ctx.guild.id}"
-        folder_for_musics_path = os.path.join(self.PATH, folder_for_musics)
-
-        return folder_for_musics_path
 
     async def verify_how_to_use_embed(self, ctx):
         if self.download_fail:
             return
-         
+
         if self.playlist_status:
             await ctx.channel.send(embed=self.playlist_entity.get_embed_response())
         elif self.music_unit_status:
@@ -212,4 +191,3 @@ class PlayerMusic:
                 return
             else:
                 await ctx.channel.send(embed=self.track_entity.get_embed_for_track())
-
