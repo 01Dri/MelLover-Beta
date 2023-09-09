@@ -75,3 +75,34 @@ def get_winrate_account_league(nick):
         except:
             return 0
 
+def get_id_champ_maestry_for_nick_sumonner(nick):
+    id_summoner = get_account_id_league(nick)
+    api_riot = f"https://br1.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-summoner/{id_summoner}?api_key={TOKEN_RIOT}"
+    response_api = requests.get(api_riot)
+    response_api_json = response_api.json()
+    champ_max_maestry = max(response_api_json, key=lambda x: x['championPoints'])
+    id_champ_max = champ_max_maestry['championId']
+    return id_champ_max
+
+
+        
+def get_name_for_champion_id(nick):
+    url = "http://ddragon.leagueoflegends.com/cdn/13.17.1/data/en_US/champion.json"
+    id_champ = get_id_champ_maestry_for_nick_sumonner(nick)
+    response = requests.get(url)
+
+    if response.status_code == 200:
+        data = response.json()
+        champions = data["data"]
+
+        champion = next((champ for champ in champions.values() if champ["key"] == str(id_champ)), None)
+        champion_name = champion["name"]
+        return champion_name
+
+
+def get_url_image_for_champ_max_maestry(nick):
+    nickname_for_champ = get_name_for_champion_id(nick)
+    api_splash = f"http://ddragon.leagueoflegends.com/cdn/img/champion/splash/{nickname_for_champ}_0.jpg"
+    return  api_splash
+
+
