@@ -8,8 +8,8 @@
 O MelLoverBot é um bot de Discord desenvolvido para a minha namorada, para que ela possa aproveitar as funcionalidades que desejar.
 
 ## ATUALIZAÇÕES!!!
-- Campo PDL adicionado ao embed da mensagem!
-- Agora a imagem do embed do contalol é o main da conta (champ com maior maestria)
+
+- Agora a imagem do `EMBED` do `!contalol` é o `MAIN` da conta `(champ com maior maestria)`
 ![Exemplos](https://images2.imgbox.com/a0/87/Hns9PTn5_o.png)
 
 ## Adicione o MelLoverBOT em seu servidor!
