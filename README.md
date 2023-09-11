@@ -9,7 +9,7 @@ O MelLoverBot é um bot de Discord desenvolvido para a minha namorada, para que 
 
 
 ## Adicione o MelLoverBOT em seu servidor!
-- [RaposyBOT](https://discord.com/oauth2/authorize?client_id=1069130540306935858&scope=bot&permissions=8) link para adiciona-lo em seu servidor.
+- [MelLoverBOT](https://discord.com/oauth2/authorize?client_id=1069130540306935858&scope=bot&permissions=8) link para adiciona-lo em seu servidor.
 
 ## Funcionalidades Principais 🚀
 
