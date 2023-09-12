@@ -11,6 +11,8 @@ O MelLoverBot é um bot de Discord desenvolvido para a minha namorada, para que 
 
 - Agora a imagem do `EMBED` do `!contalol` é o `MAIN` da conta `(champ com maior maestria)`
 ![Exemplos](https://images2.imgbox.com/a0/87/Hns9PTn5_o.png)
+- Suporte para músicas do `SPOTIFY`
+- ![Exemplos](https://images2.imgbox.com/d7/68/3A8uhgwS_o.png)
 
 ## Adicione o MelLoverBOT em seu servidor!
 - [MelLoverBOT](https://discord.com/oauth2/authorize?client_id=1069130540306935858&scope=bot&permissions=8) link para adiciona-lo em seu servidor.
