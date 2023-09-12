@@ -12,3 +12,4 @@ COLOR_FOR_EMBEDS_ERROR = 0xFF0000
 LINK_FOR_YOUTUBE = "https://www.youtube.com/"
 LINK_MUSIC_UNIT_FOR_YOUTUBE = "https://www.youtube.com/watch"
 PLAYLIST_LINK = "https://www.youtube.com/playlist"
+LINK_FOR_SPOTIFY = "https://open.spotify.com/intl-pt/track/"
