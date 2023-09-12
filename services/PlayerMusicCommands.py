@@ -1,13 +1,13 @@
 import asyncio
 import discord
-
+import time
 from services.DownloaderMusics import DownloadMusics
 
 from pytube import Playlist
 from pytube import YouTube
 from pytube.exceptions import VideoUnavailable
 
-from constants.Contants import DEFAULT_PATH, LINK_FOR_SPOTIFY
+from constants.Contants import DEFAULT_PATH, LINK_FOR_SPOTIFY, LINK_FOR_SPOTIFY_MOBAL
 from constants.Contants import LINK_FOR_YOUTUBE
 from constants.Contants import PLAYLIST_LINK
 from constants.Contants import LINK_MUSIC_UNIT_FOR_YOUTUBE
@@ -47,13 +47,13 @@ class PlayerMusic:
         self.spotify_url = False
         self.file = None
 
-
     async def load_songs(self, ctx):
         global playlist_desc
         parts_message = ctx.content.split()
         url = parts_message[1]
         print(url)
-        if LINK_FOR_YOUTUBE in url:
+
+        if url.startswith(LINK_FOR_YOUTUBE):
             if PLAYLIST_LINK in url:
                 print("passou aq")
                 try:
@@ -75,6 +75,7 @@ class PlayerMusic:
                     print("Link inválido")
                     self.download_fail = True
                     await ctx.reply(embed=create_embed_for_error_link_music())
+                return
 
             if LINK_MUSIC_UNIT_FOR_YOUTUBE in url:
                 print("passou aq")
@@ -91,14 +92,15 @@ class PlayerMusic:
                 except VideoUnavailable:
                     print("Link inválido")
                     self.download_fail = True
-                    await ctx.reply(embed=create_embed_for_error_link_music())
+                return
 
-        if LINK_FOR_SPOTIFY in url:
+        elif url.startswith(LINK_FOR_SPOTIFY):
             self.playlist_status = False
             self.music_unit_status = True
             info_sound_spitify = self.downloader.get_dados_for_track_spotify(url)
             try:
-                self.track_entity = Track(info_sound_spitify[1], info_sound_spitify[0].length, info_sound_spitify[3], ctx.author, ctx.author.display_avatar)
+                self.track_entity = Track(info_sound_spitify[1], info_sound_spitify[0].length,
+                                          info_sound_spitify[3], ctx.author, ctx.author.display_avatar)
                 self.playlist_songs.append(url)
                 self.spotify_url = True
                 self.download_fail = False
@@ -107,8 +109,11 @@ class PlayerMusic:
                 print("Link inválido")
                 self.download_fail = True
                 await ctx.reply(embed=create_embed_for_error_link_music())
-        else:
+            return
+
+        elif LINK_FOR_YOUTUBE not in url or LINK_FOR_SPOTIFY not in url:
             await ctx.reply(embed=create_embed_for_error_link_music())
+            return
 
 
     async def connect_bot_and_load_songs(self, ctx):
@@ -123,7 +128,6 @@ class PlayerMusic:
                 await self.load_songs(ctx)
         return
 
-
     async def verify_status(self):
         while self.pause_status or self.voice_client.is_playing():
             await asyncio.sleep(1)
@@ -137,13 +141,11 @@ class PlayerMusic:
         await self.verify_how_to_use_embed(ctx)
         while self.playlist_songs:
             self.downloader = DownloadMusics(self.track_entity.url, ctx)
-            print(self.track_entity.url)
             if self.spotify_url:
                 self.file = self.downloader.download_music_for_spotify(self.track_entity.url)
                 self.spotify_url = False
             else:
                 self.file = self.downloader.download_music_for_youtube()
-                print(self.file)
             try:
                 if not self.skip_status:
                     await asyncio.sleep(2)
@@ -203,15 +205,15 @@ class PlayerMusic:
         await asyncio.sleep(2)
         await self.downloader.remove_mp4_files(ctx)
 
-
     async def verify_how_to_use_embed(self, ctx):
         if self.download_fail:
             return
-
         if self.playlist_status:
             await ctx.channel.send(embed=self.playlist_entity.get_embed_response())
+            return
         elif self.music_unit_status:
             if self.track_entity is None:
                 return
             else:
                 await ctx.channel.send(embed=self.track_entity.get_embed_for_track())
+        return
