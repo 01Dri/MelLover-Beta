@@ -48,9 +48,9 @@ def create_embed_for_error_voice_connect():
     embed.add_field(name="ERRO: ", value="**Você precisa estar conectado em um canal de voz para usar esse comando!**", inline=False)
     return embed
 
-def create_embed_for_skip(next_music):
+def create_embed_for_skip():
     embed = discord.Embed(title="Mel Musicas", color=COLOR_FOR_EMBEDS)
-    embed.add_field(name=f"Próxima na fila é: **{next_music}**", value=f"", inline=False)
+    embed.add_field(name=f"Música pulada!", value=f"", inline=False)
     return embed
 
 def create_embed_for_pause():

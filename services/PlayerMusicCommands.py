@@ -1,13 +1,12 @@
 import asyncio
 import discord
-import time
 from services.DownloaderMusics import DownloadMusics
 
 from pytube import Playlist
 from pytube import YouTube
 from pytube.exceptions import VideoUnavailable
 
-from constants.Contants import DEFAULT_PATH, LINK_FOR_SPOTIFY, LINK_FOR_SPOTIFY_MOBAL
+from constants.Contants import DEFAULT_PATH, LINK_FOR_SPOTIFY
 from constants.Contants import LINK_FOR_YOUTUBE
 from constants.Contants import PLAYLIST_LINK
 from constants.Contants import LINK_MUSIC_UNIT_FOR_YOUTUBE
@@ -43,7 +42,7 @@ class PlayerMusic:
         self.playlist_status = False
         self.music_unit_status = False
         self.download_fail = True
-        self.downloader = DownloadMusics(None, ctx)
+        self.downloader = DownloadMusics()
         self.spotify_url = False
         self.file = None
 
@@ -55,7 +54,7 @@ class PlayerMusic:
 
         if url.startswith(LINK_FOR_YOUTUBE):
             if PLAYLIST_LINK in url:
-                print("passou aq")
+                print("passou playlist youtube")
                 try:
                     self.playlist_queue_pytube = Playlist(url)
                     self.music_unit_status = False
@@ -66,11 +65,13 @@ class PlayerMusic:
                         playlist_desc = "Sem descrição"
                     self.playlist_entity = PlaylistEntity(self.playlist_queue_pytube.title,
                                                           self.playlist_queue_pytube.length,
-                                                          "teste", "teste", playlist_desc)
+                                                          url, playlist_desc)
                     for track in self.playlist_queue_pytube:
                         self.playlist_songs.append(track)
+
                         self.spotify_url = False
                         self.download_fail = False
+
                 except KeyError:
                     print("Link inválido")
                     self.download_fail = True
@@ -78,7 +79,6 @@ class PlayerMusic:
                 return
 
             if LINK_MUSIC_UNIT_FOR_YOUTUBE in url:
-                print("passou aq")
                 self.playlist_status = False
                 self.music_unit_status = True
                 try:
@@ -95,6 +95,7 @@ class PlayerMusic:
                 return
 
         elif url.startswith(LINK_FOR_SPOTIFY):
+
             self.playlist_status = False
             self.music_unit_status = True
             info_sound_spitify = self.downloader.get_dados_for_track_spotify(url)
@@ -115,6 +116,17 @@ class PlayerMusic:
             await ctx.reply(embed=create_embed_for_error_link_music())
             return
 
+    def load_songs_unit(self, url, ctx):
+        try:
+            self.track_by_pytube = YouTube(url)
+            self.track_entity = Track(self.track_by_pytube.title, self.track_by_pytube.length,
+                                      url, ctx.author, ctx.author.display_avatar)
+            self.download_fail = False
+            self.spotify_url = False
+
+        except VideoUnavailable:
+            print("Link inválido")
+            self.download_fail = True
 
     async def connect_bot_and_load_songs(self, ctx):
         if ctx.author.voice is None or ctx.author.voice.channel is None:
@@ -140,20 +152,22 @@ class PlayerMusic:
         await self.connect_bot_and_load_songs(ctx)
         await self.verify_how_to_use_embed(ctx)
         while self.playlist_songs:
-            self.downloader = DownloadMusics(self.track_entity.url, ctx)
-            if self.spotify_url:
-                self.file = self.downloader.download_music_for_spotify(self.track_entity.url)
-                self.spotify_url = False
-            else:
-                self.file = self.downloader.download_music_for_youtube()
+            try:
+                if LINK_FOR_SPOTIFY in self.playlist_songs[self.i]:
+                    self.file = self.downloader.download_music_for_spotify(self.track_entity.url, ctx)
+                else:
+                    self.load_songs_unit(self.playlist_songs[self.i], ctx)
+                    self.file = self.downloader.download_music_for_youtube(self.track_entity.url, ctx)
+            except:
+                pass
+            
             try:
                 if not self.skip_status:
-                    await asyncio.sleep(2)
-                    self.voice_client.play(self.file)
-                    self.i += 1
-                    if self.track_entity is None:
+                    if self.voice_client.is_playing():
                         return
                     else:
+                        self.voice_client.play(self.file)
+                        self.i += 1
                         await ctx.channel.send(embed=self.track_entity.get_embed_for_track_current())
                         await self.verify_status()
                 else:
@@ -163,6 +177,9 @@ class PlayerMusic:
                 print(e)
                 await asyncio.sleep(180)
                 break
+
+        await asyncio.sleep(180)
+        await self.stop(ctx)
 
     async def pause(self, ctx):
 
@@ -178,7 +195,7 @@ class PlayerMusic:
     async def skip(self, ctx):
         self.voice_client.stop()
         self.skip_status = True
-        await ctx.reply(embed=create_embed_for_skip(self.track_entity.name))
+        await ctx.reply(embed=create_embed_for_skip())
 
     async def stop(self, ctx):
         await self.disconnect(ctx)
@@ -187,7 +204,7 @@ class PlayerMusic:
         await ctx.reply(embed=create_embed_for_stop())
 
     async def disconnect_for_away(self, ctx):
-        if self.voice_client == None:
+        if self.voice_client is None:
             return
         if not self.voice_client.is_playing():
             await asyncio.sleep(180)
