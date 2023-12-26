@@ -1,3 +1,4 @@
+.cache
 .env
 requirements.txt
 discloud.config
