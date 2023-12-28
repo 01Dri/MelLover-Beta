@@ -16,4 +16,3 @@ class AccountLoL:
         self.best_champ = best_champ
 
 
-

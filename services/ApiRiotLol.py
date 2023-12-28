@@ -1,20 +1,28 @@
 import requests
-from exceptions import FailedGetSummonerByNick, FailedGetInfoLeagueByUserId, FailedGetSummonerLevel, FailedGetWinrateSummonerByNick, FailedGetIdChampMaestryByNick, FailedGetNameChampById
+from exceptions.FailedGetSummonerByNick import FailedGetSummonerByNick
+from exceptions.FailedGetInfoLeagueByUserId import FailedGetInfoLeagueByUserId
+from exceptions.FailedGetSummonerLevel import FailedGetSummonerLevel
+from exceptions.FailedGetWinrateSummonerByNick import FailedGetWinrateSummonerByNick
+from exceptions.FailedGetIdChampMaestryByNick import FailedGetIdChampMaestryByNick
+from exceptions.FailedGetNameChampById import FailedGetNameChampById
+
 from entities import AccountLoL
+
 
 class ApiRiot:
 
     def __init__(self, token) -> None:
         self.token = token
         self.headers_token = {
-            'Authorization': f'Bearer {self.token}'
+            'X-Riot-Token': f'{self.token}'
         }
-        pass
+
     def get_account_id_by_nick(self, nick):
         endpoint_get_summoner_by_nick_riot = f'https://br1.api.riotgames.com/lol/summoner/v4/summoners/by-name/{nick}'
         response_api = requests.get(endpoint_get_summoner_by_nick_riot, headers=self.headers_token)
         if response_api.status_code != 200:
-            raise FailedGetSummonerByNick(f'Failed to recover summoners info by nick, status code: {response_api.status_code}')
+            raise FailedGetSummonerByNick(
+                f'Failed to recover summoners info by nick, status code: {response_api.status_code}')
         response_api_json = response_api.json()
         return response_api_json['id']
 
@@ -23,10 +31,12 @@ class ApiRiot:
         endpoint_get_summoner_league_by_id_riot = f"https://br1.api.riotgames.com/lol/league/v4/entries/by-summoner/{id_account_user}"
         response_api = requests.get(endpoint_get_summoner_league_by_id_riot, headers=self.headers_token)
         if response_api.status_code != 200:
-            raise FailedGetInfoLeagueByUserId(f"Failed to recover league info by id, status code: {response_api.status_code})
-        return  response_api.json()
+            raise FailedGetInfoLeagueByUserId(
+                f'Failed to recover league info by id, status code: {response_api.status_code}')
+        return response_api.json()
 
-    def parser_info_json_to_hash_map(self, json_account_info, nick, id_account):
+    def parser_info_json_to_hash_map(self, json_account_info, nick):
+        id_account = self.get_account_id_by_nick(nick)
         op_gg_account = f"https://www.op.gg/summoners/br/{nick}"
         level = self.get_level_account(id_account)
         best_champ_url = self.get_url_image_for_champ_max_maestry(nick)
@@ -54,8 +64,8 @@ class ApiRiot:
             return level
         raise FailedGetSummonerLevel(f'Failed to get summoner level. status code: {response_api.status_code}')
 
-
-    def get_entity_account_lol(self, json_account_info, nick, id_account):
+    def get_entity_account_lol(self, json_account_info, nick):
+        id_account = self.get_account_id_by_nick(nick)
         info_account_hash_map = self.parser_info_json_to_hash_map(json_account_info, nick, id_account)
         id = info_account_hash_map['id']
         nick = info_account_hash_map['nick']
@@ -88,8 +98,6 @@ class ApiRiot:
             return winrate_round
         raise FailedGetWinrateSummonerByNick(f'Failed to get winrate summoner, status code: {response_api.status_code}')
 
-
-
     def get_id_champ_maestry_by_nick_summoner(self, nick):
         id_summoner = self.get_account_id_by_nick(nick)
         endpoint_get_id_champ_riot = f"https://br1.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-summoner/{id_summoner}"
@@ -100,8 +108,6 @@ class ApiRiot:
             id_champ_max = champ_max_maestry['championId']
             return id_champ_max
         raise FailedGetIdChampMaestryByNick(f'Failed to get id champ, status code: {response_api.status_code}')
-
-
 
     def get_name_for_champion_id(self, nick):
         endpoint_dragon_league_of_legends = "http://ddragon.leagueoflegends.com/cdn/13.17.1/data/en_US/champion.json"
@@ -118,6 +124,4 @@ class ApiRiot:
     def get_url_image_for_champ_max_maestry(self, nick):
         nickname_for_champ = self.get_name_for_champion_id(nick)
         url_image_champ_splash = f"http://ddragon.leagueoflegends.com/cdn/img/champion/splash/{nickname_for_champ}_0.jpg"
-        return  url_image_champ_splash
-
-
+        return url_image_champ_splash
