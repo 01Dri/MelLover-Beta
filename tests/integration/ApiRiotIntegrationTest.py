@@ -3,7 +3,7 @@ import unittest
 from constants.Contants import TOKEN_RIOT
 from exceptions.FailedGetSummonerByNick import FailedGetSummonerByNick
 from exceptions.FailedGetSummonerLevel import FailedGetSummonerLevel
-from services.ApiRiotLol import ApiRiot
+from services.extenal_api.ApiRiotLol import ApiRiot
 from exceptions.RiotTokenInvalid import RiotTokenInvalid
 
 

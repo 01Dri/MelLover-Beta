@@ -2,7 +2,7 @@ import unittest
 
 from exceptions.FailedGetSummonerByNick import FailedGetSummonerByNick
 from exceptions.RiotTokenInvalid import RiotTokenInvalid
-from services.ApiRiotLol import ApiRiot
+from services.extenal_api.ApiRiotLol import ApiRiot
 from constants.Contants import TOKEN_RIOT
 from unittest.mock import MagicMock, patch
 
