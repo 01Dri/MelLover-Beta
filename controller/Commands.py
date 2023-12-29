@@ -1,5 +1,5 @@
-from services.LolServices import LolServices
-from services.PlayerMusicCommands import PlayerMusic
+from services.league_of_legends_account.LolServices import LolServices
+from services.player_music.PlayerMusicCommands import PlayerMusic
 
 
 class BotCommands:
@@ -12,7 +12,6 @@ class BotCommands:
         if ctx.author == self.client.user:
             return
         content_message = ctx.content.lower()
-
         if content_message.startswith("!contalol"):
             lol_services = LolServices(ctx)
             await lol_services.get_entity_account_lol(ctx)

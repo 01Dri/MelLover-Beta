@@ -15,7 +15,7 @@ async def on_ready():
 @client.event
 async def on_message(message):
     handler_commands  = BotCommands(client)
-    await handler_commands.handler_comamnds(message)
+    await handler_commands.handler_commands(message)
 
 if __name__ == "__main__":
     client.run(os.getenv("TOKEN_DISCORD"))

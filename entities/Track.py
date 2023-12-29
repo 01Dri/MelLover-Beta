@@ -1,4 +1,4 @@
-from embeds.Embeds import create_embed_for_music_unit, create_embed_for_music_current
+from view.view_league_of_legends.ViewEmbedLol import create_embed_for_music_unit, create_embed_for_music_current
 
 
 class Track():
