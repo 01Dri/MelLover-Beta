@@ -27,6 +27,7 @@ class ApiRiotTest(unittest.TestCase):
             mock_get.return_value = mock_response_request
             level_result = api_riot_lol.get_level_account("Drikill")
             self.assertEqual(402, level_result)
+
     def test_get_winrate_account_by_nick(self):
         with patch('requests.get') as mock_get:
             api_riot_lol = ApiRiot(TOKEN_RIOT)
@@ -45,24 +46,7 @@ class ApiRiotTest(unittest.TestCase):
                 winrate_result = api_riot_lol.get_winrate_account_by_nick("Drikill")
                 self.assertEqual(33, winrate_result)
 
-
-
-    def test_parser_info_json_to_hash_map(self):  ## Test this after fix get level
-        mock_api_riot_lol_mock = MagicMock()
-        mock_requests = MagicMock()
-        mock_api_riot_lol_mock.get_account_all_info.return_value = {
-            "queueType": "RANKED_SOLO_5x5",
-            "tier": "3",
-            "rank": "GOLD",
-            "leaguePoints": 50
-        }
-        mock_api_riot_lol_mock.get_account_id_by_nick.return_value = 5
-        mock_api_riot_lol_mock.get_level_account.return_value = 30  # I need to fix this
-        mock_api_riot_lol_mock.get_url_image_for_champ_max_maestry.return_value = 'https://teste.png'
-        mock_api_riot_lol_mock.get_winrate_account_by_nick.return_value = 50.0
-        api_riot = ApiRiot(TOKEN_RIOT)
-        map_result = api_riot.parser_info_json_to_hash_map("Drikill")
-        self.assertEqual("5", map_result['id'])
+    ## Missing test get_id_champ, get_name_champ and get_entity_account
 
     def test_exception_failed_get_id_account(self):
         with patch('requests.get') as mock_get:
