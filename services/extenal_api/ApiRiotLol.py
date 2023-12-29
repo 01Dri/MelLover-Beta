@@ -39,26 +39,6 @@ class ApiRiot:
         account_lol_entity = AccountLoL(id, nick, level, rank, tier, winrate, pdl, op_gg, best_champ_url)
         return account_lol_entity
 
-    def get_account_id_by_nick(self, nick):
-        endpoint_get_summoner_by_nick_riot = f'https://br1.api.riotgames.com/lol/summoner/v4/summoners/by-name/{nick}'
-        response_api = requests.get(endpoint_get_summoner_by_nick_riot, headers=self.headers_token)
-        self.validation_token(response_api)
-        if response_api.status_code != 200 and response_api.status_code != 403 and response_api.status_code != 401:
-            raise FailedGetSummonerByNick(
-                f'Failed to recover summoners info by nick, status code: {response_api.status_code}')
-        response_api_json = response_api.json()
-        return response_api_json['id']
-
-    def get_account_all_info(self, nick):
-        id_account_user = self.get_account_id_by_nick(nick)
-        endpoint_get_summoner_league_by_id_riot = f"https://br1.api.riotgames.com/lol/league/v4/entries/by-summoner/{id_account_user}"
-        response_api = requests.get(endpoint_get_summoner_league_by_id_riot, headers=self.headers_token)
-        self.validation_token(response_api)
-        if response_api.status_code != 200 and response_api.status_code != 403 and response_api.status_code != 401:
-            raise FailedGetInfoLeagueByUserId(
-                f'Failed to recover league info by id, status code: {response_api.status_code}')
-        return response_api.json()
-
     def parser_info_json_to_hash_map(self, nick):
         json_account_info = self.get_account_all_info(nick)
         id_account = self.get_account_id_by_nick(nick)
@@ -79,6 +59,26 @@ class ApiRiot:
                 hash_map_info['op_gg'] = op_gg_account
                 hash_map_info['best_champ'] = "yasuo"
         return hash_map_info
+
+    def get_account_id_by_nick(self, nick):
+        endpoint_get_summoner_by_nick_riot = f'https://br1.api.riotgames.com/lol/summoner/v4/summoners/by-name/{nick}'
+        response_api = requests.get(endpoint_get_summoner_by_nick_riot, headers=self.headers_token)
+        self.validation_token(response_api)
+        if response_api.status_code != 200 and response_api.status_code != 403 and response_api.status_code != 401:
+            raise FailedGetSummonerByNick(
+                f'Failed to recover summoners info by nick, status code: {response_api.status_code}')
+        response_api_json = response_api.json()
+        return response_api_json['id']
+
+    def get_account_all_info(self, nick):
+        id_account_user = self.get_account_id_by_nick(nick)
+        endpoint_get_summoner_league_by_id_riot = f"https://br1.api.riotgames.com/lol/league/v4/entries/by-summoner/{id_account_user}"
+        response_api = requests.get(endpoint_get_summoner_league_by_id_riot, headers=self.headers_token)
+        self.validation_token(response_api)
+        if response_api.status_code != 200 and response_api.status_code != 403 and response_api.status_code != 401:
+            raise FailedGetInfoLeagueByUserId(
+                f'Failed to recover league info by id, status code: {response_api.status_code}')
+        return response_api.json()
 
     def get_level_account(self, nick):
         endpoint_get_level_league_by_id_riot = f'https://br1.api.riotgames.com/lol/summoner/v4/summoners/by-name/{nick}'
@@ -111,7 +111,6 @@ class ApiRiot:
         winrate_round = round(winrate)
         return winrate_round
 
-
     # --- THESE FUNCTIONS BELLOW DON'T WORK ON MOMENT --- #
     def get_id_champ_maestry_by_nick_summoner(self, nick):
         id_summoner = self.get_account_id_by_nick(nick)
@@ -141,4 +140,3 @@ class ApiRiot:
         nickname_for_champ = self.get_name_by_champion_id(nick)
         url_image_champ_splash = f"http://ddragon.leagueoflegends.com/cdn/img/champion/splash/{nickname_for_champ}_0.jpg"
         return url_image_champ_splash
-
