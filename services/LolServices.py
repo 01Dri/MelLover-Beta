@@ -1,9 +1,9 @@
 import urllib.parse
 from entities.DiscordAccount import DiscordAccount
-from exceptions.FailedGetSummonerByNick import FailedGetSummonerByNick
+from exceptions.league_of_legends_exceptions.FailedGetSummonerByNick import FailedGetSummonerByNick
 from services.extenal_api.ApiRiotLol import ApiRiot
 from constants.Contants import TOKEN_RIOT
-from exceptions.NickIsNone import NickIsNone
+from exceptions.league_of_legends_exceptions.NickIsNone import NickIsNone
 from embeds.Embeds import ViewEmbedLol
 
 

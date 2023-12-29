@@ -1,10 +1,10 @@
 import unittest
 
 from constants.Contants import TOKEN_RIOT
-from exceptions.FailedGetSummonerByNick import FailedGetSummonerByNick
-from exceptions.FailedGetSummonerLevel import FailedGetSummonerLevel
+from exceptions.league_of_legends_exceptions.FailedGetSummonerByNick import FailedGetSummonerByNick
+from exceptions.league_of_legends_exceptions.FailedGetSummonerLevel import FailedGetSummonerLevel
 from services.extenal_api.ApiRiotLol import ApiRiot
-from exceptions.RiotTokenInvalid import RiotTokenInvalid
+from exceptions.league_of_legends_exceptions.RiotTokenInvalid import RiotTokenInvalid
 
 
 class ApiRioIntegrationTests(unittest.TestCase):
