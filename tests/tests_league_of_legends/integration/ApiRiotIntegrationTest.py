@@ -3,8 +3,8 @@ import unittest
 from constants.Contants import TOKEN_RIOT
 from exceptions.league_of_legends_exceptions.FailedGetSummonerByNick import FailedGetSummonerByNick
 from exceptions.league_of_legends_exceptions.FailedGetSummonerLevel import FailedGetSummonerLevel
-from services.league_of_legends_account.extenal_api import ApiRiot
 from exceptions.league_of_legends_exceptions.RiotTokenInvalid import RiotTokenInvalid
+from services.league_of_legends_account.extenal_api.ApiRiotLol import ApiRiot
 
 
 class ApiRioIntegrationTests(unittest.TestCase):
