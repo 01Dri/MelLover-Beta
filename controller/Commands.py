@@ -1,3 +1,5 @@
+import time
+
 from services.league_of_legends_account.LolServices import LolServices
 from services.player_music.PlayerMusicCommands import PlayerMusic
 
@@ -14,7 +16,11 @@ class BotCommands:
         content_message = ctx.content.lower()
         if content_message.startswith("!contalol"):
             lol_services = LolServices(ctx)
-            await lol_services.get_entity_account_lol(ctx)
+            inicio = time.time()
+            await lol_services.get_account_lol_info(ctx)
+            fim = time.time()
+            tempo_execucao = fim - inicio
+            print(f"A função levou {tempo_execucao} segundos para executar.")
 
         if ctx.content.startswith("!m"):
             if ctx.guild.id not in self.guid_musicas:

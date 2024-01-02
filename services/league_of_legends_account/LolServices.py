@@ -13,16 +13,15 @@ class LolServices:
 
     def __init__(self, ctx):
         self.account_discord = DiscordAccount(ctx.author)
-        nick = self.parser_nick_command(ctx)
         self.lol_api_services = None
         self.view_embeds = ViewEmbedLol()
+        self.nick = None
 
-    async def get_entity_account_lol(self, ctx):
-        global nick
-        self.lol_api_services = ApiRiot(nick, TOKEN_RIOT)
+    async def get_account_lol_info(self, ctx):
+        self.lol_api_services = ApiRiot(self.nick, TOKEN_RIOT)
         try:
-            nick = self.parser_nick_command(ctx)
-            self.lol_api_services = ApiRiot(nick, TOKEN_RIOT)
+            self.nick = self.parser_nick_command(ctx)
+            self.lol_api_services = ApiRiot(self.nick, TOKEN_RIOT)
             entity_account = self.lol_api_services.get_entity_account_lol()
             await self.view_embeds.get_embed_account_lol(ctx, entity_account.nick, entity_account.league,
                                                          entity_account.tier, entity_account.level,
@@ -31,14 +30,13 @@ class LolServices:
         except NickIsNone:
             await self.view_embeds.get_embed_account_lol_nick_is_none(ctx)
         except FailedGetSummonerByNick:
-            await self.view_embeds.get_embed_account_lol_nick_not_exist(ctx, nick)
+            await self.view_embeds.get_embed_account_lol_nick_not_exist(ctx, self.nick)
         except SummonerAccountNotHaveInfoSoloDuoQueue:
-            await self.view_embeds.get_embed_account_lol_without_solo_duo_info(ctx, nick)
+            await self.view_embeds.get_embed_account_lol_without_solo_duo_info(ctx, self.nick, self.lol_api_services.get_level_account_by_nick(), f"https://www.op.gg/summoners/br/{self.nick}")
 
     def parser_nick_command(self, ctx):
         parts = ctx.content.split()
-        global nick
         if len(parts) > 1 and parts[0] == "!contalol":
-            nick = urllib.parse.quote(" ".join(parts[1:]))
-            return nick
+            self.nick = urllib.parse.quote(" ".join(parts[1:]))
+            return self.nick
         raise NickIsNone("Nick doesn't can be none")

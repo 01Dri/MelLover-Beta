@@ -64,7 +64,33 @@ class ApiRioIntegrationTests(unittest.TestCase):
         for item in json_result:
             if item.get('queueType') == 'RANKED_SOLO_5x5':
                 tier = item.get('tier')
-        self.assertEqual("GOLD", tier)
+        self.assertEqual("PLATINUM", tier)
+
+    def test_get_id_maestry_champ_by_puuid(self):
+        api_riot_lol = ApiRiot("Drikill", TOKEN_RIOT)
+        id_champ_result = api_riot_lol.get_id_best_champion_account_by_puuid()
+        self.assertEqual(157, id_champ_result)
+
+    def test_get_name_by_champion_id(self):
+        ID_CHAMP = 157  # YASUO
+        NAME_CHAMP = "Yasuo"
+        api_riot_lol = ApiRiot("Drikill", TOKEN_RIOT)
+        id_champ_result = api_riot_lol.get_id_best_champion_account_by_puuid()
+        self.assertEqual(ID_CHAMP, id_champ_result)
+        name_champ_result = api_riot_lol.get_name_by_champion_id()
+        self.assertEqual(NAME_CHAMP, name_champ_result)
+
+    def test_get_url_splash_art_by_name_champ(self):
+        ID_CHAMP = 157  # YASUO
+        NAME_CHAMP = "Yasuo"
+        URL_SPLASH_ART = "http://ddragon.leagueoflegends.com/cdn/img/champion/splash/Yasuo_0.jpg"
+        api_riot_lol = ApiRiot("Drikill", TOKEN_RIOT)
+        id_champ_result = api_riot_lol.get_id_best_champion_account_by_puuid()
+        self.assertEqual(ID_CHAMP, id_champ_result)
+        name_champ_result = api_riot_lol.get_name_by_champion_id()
+        self.assertEqual(NAME_CHAMP, name_champ_result)
+        url_splash_art_result = api_riot_lol.get_url_splash_art_best_champ_by_id_champ()
+        self.assertEqual(URL_SPLASH_ART, url_splash_art_result)
 
     def test_exception_account_without_info_solo_queue_account(self):
         api_riot_lol = ApiRiot("Dri", TOKEN_RIOT)  # Account Dri not have a info on soloqueue

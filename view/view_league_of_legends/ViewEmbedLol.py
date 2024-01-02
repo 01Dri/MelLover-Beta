@@ -21,7 +21,7 @@ class ViewEmbedLol:
         embed.add_field(name="WINRATE", value=f'{winrate}%', inline=False)
         embed.add_field(name="PDL", value=pdl, inline=False)
         embed.add_field(name="OPGG", value=op_gg, inline=False)
-        # embed.set_image(url=self.url_splash_art)
+        embed.set_image(url=url_splash_art_champ)
         await ctx.reply(embed=embed)
 
     async def get_embed_account_lol_nick_is_none(self, ctx):
@@ -42,14 +42,15 @@ class ViewEmbedLol:
         embed.set_image(url="https://thc.bing.com/th/id/OIG.8PhgK58TGnckz_lgvXvq?pid=ImgGn")  # AI IMAGE
         await ctx.reply(embed=embed)
 
-    async def get_embed_account_lol_without_solo_duo_info(self, ctx, nick):
+    async def get_embed_account_lol_without_solo_duo_info(self, ctx, nick, level, op_gg):
         nick = self.parser_nick_char(nick)
         embed = discord \
             .Embed(
-            title='LEAGUE OF LEGENDS ACCOUNT', description="ERROR INFO", color=COLOR_FOR_EMBEDS_ERROR)
-        embed.add_field(name=f"Conta não possui jogos ranqueados SOLO/DUO!!!", value=f"A conta com o nick **{nick}** ainda não fez sua MD5",
-                        inline=False)
-        embed.set_image(url="https://thc.bing.com/th/id/OIG.8PhgK58TGnckz_lgvXvq?pid=ImgGn")  # AI IMAGE
+            title='LEAGUE OF LEGENDS ACCOUNT', description="SOLO DUO QUEUE", color=COLOR_FOR_EMBEDS)
+        embed.add_field(name="NICKNAME", value=nick.upper(), inline=False)
+        embed.add_field(name="TIER", value="UNRANKED", inline=False)
+        embed.add_field(name="LEVEL", value=level, inline=False)
+        embed.add_field(name="OPGG", value=op_gg, inline=False)
         await ctx.reply(embed=embed)
 
     def parser_nick_with_space(self, nick):
