@@ -23,6 +23,11 @@ class ApiRiot:
         self.logger = LoggerConfig()
         self.nick = nick
         self.puuid = None
+        self.rank = None
+        self.tier = None
+        self.pdl = None
+        self.level = None
+        self.winrate = None
         self.id_best_champion = None
         self.nick_name_best_champ = None
         self.url_splash_art_best_champ = None
@@ -39,7 +44,7 @@ class ApiRiot:
                 f"Failed to sent request because the token is invalid, status code: {response.status_code} and message error: {message}")
 
     def get_entity_account_lol(self):
-        info_account_hash_map = self.parser_info_json_to_hash_map()
+        info_account_hash_map = self.get_all_info_account_league()
         try:
             id_account = info_account_hash_map['id']
             nick = info_account_hash_map['nick']
@@ -57,28 +62,16 @@ class ApiRiot:
                 "ERROR ON FUNCTION 'GET_ENTITY_ACCOUNT_LOL' GET VALUES OF HASH MAP")
             raise ErrorGetValueHashMapInfoAccount(f"ERROR WHILE GET VALUES OF HASH MAP WITH INFO ACCOUNT LEAGUE: {e}")
 
-    def parser_info_json_to_hash_map(self):
+    def get_all_info_account_league(self):
         self.get_account_id_by_nick()
-        json_account_info = self.get_account_all_info()
+        self.get_account_tier_rank_and_pdl()
         op_gg_account = f"https://www.op.gg/summoners/br/{self.nick}"
-        level = self.get_level_account_by_nick()
-        winrate_account = self.get_winrate_account_by_nick()
-        self.get_id_best_champion_account_by_puuid()
-        self.get_name_by_champion_id()
-        hash_map_info = {}
-        for item in json_account_info:
-            if item.get('queueType') == 'RANKED_SOLO_5x5':
-                hash_map_info['id'] = self.id_account
-                hash_map_info['nick'] = self.nick
-                hash_map_info['tier'] = item.get('tier')
-                hash_map_info['rank'] = item.get('rank')
-                hash_map_info['pdl'] = item.get('leaguePoints')
-                hash_map_info['level'] = level
-                hash_map_info['winrate'] = winrate_account
-                hash_map_info['op_gg'] = op_gg_account
-                hash_map_info['best_champ'] = self.get_url_splash_art_best_champ_by_id_champ()
-                return hash_map_info
-        raise SummonerAccountNotHaveInfoSoloDuoQueue("Summoner not have a solo queue info")
+        self.get_level_account_by_nick()
+        self.get_winrate_account_by_nick()
+        hash_map_info = {'id': self.id_account, 'nick': self.nick, 'tier': self.tier, 'rank': self.rank,
+                         'pdl': self.pdl, 'level': self.level, 'winrate': self.winrate,
+                         'op_gg': op_gg_account, 'best_champ': self.get_url_splash_art_best_champ_by_id_champ()}
+        return hash_map_info
 
     def get_account_id_by_nick(self):
         endpoint_get_summoner_by_nick_riot = f'https://br1.api.riotgames.com/lol/summoner/v4/summoners/by-name/{self.nick}'
@@ -89,17 +82,25 @@ class ApiRiot:
                 f'Failed to recover summoners info by nick, status code: {response_api.status_code}')
         response_api_json = response_api.json()
         self.id_account = response_api_json['id']
-        self.puuid = response_api_json['puuid'] # ALTERNATIVE ID RIOT ACCOUNT
+        self.puuid = response_api_json['puuid'] # ID ALTERNATIVE RIOT ACCOUNT
         return self.id_account
 
-    def get_account_all_info(self):
+    def get_account_tier_rank_and_pdl(self):
         endpoint_get_summoner_league_by_id_riot = f"https://br1.api.riotgames.com/lol/league/v4/entries/by-summoner/{self.id_account}"
         response_api = requests.get(endpoint_get_summoner_league_by_id_riot, headers=self.headers_token)
         self.validation_token(response_api)
         if response_api.status_code != 200 and response_api.status_code != 403 and response_api.status_code != 401:
             raise FailedGetInfoLeagueByUserId(
                 f'Failed to recover league info by id, status code: {response_api.status_code}')
-        return response_api.json()
+        response_api_json = response_api.json()
+        for item in response_api_json:
+            if item.get('queueType') == 'RANKED_SOLO_5x5':
+                self.tier = item.get('tier')
+                self.rank = item.get('rank')
+                self.pdl = item.get('leaguePoints')
+                break
+        else:
+            raise SummonerAccountNotHaveInfoSoloDuoQueue("Summoner not have a solo queue info")
 
     def get_level_account_by_nick(self):
         endpoint_get_level_league_by_id_riot = f'https://br1.api.riotgames.com/lol/summoner/v4/summoners/by-name/{self.nick}'
@@ -108,8 +109,8 @@ class ApiRiot:
         if response_api.status_code != 200 and response_api.status_code != 403 and response_api.status_code != 401:
             raise FailedGetSummonerLevel(f'Failed to get summoner level. status code: {response_api.status_code}')
         response_api_json = response_api.json()
-        level = response_api_json['summonerLevel']
-        return level
+        self.level = response_api_json['summonerLevel']
+        return self.level
 
     def get_winrate_account_by_nick(self):
         API_ENDPOINT_RIOT_LEAGUE = f'https://br1.api.riotgames.com/lol/league/v4/entries/by-summoner/{self.id_account}'
@@ -131,7 +132,8 @@ class ApiRiot:
         total_games = wins + losses
         winrate = (wins / total_games) * 100
         winrate_round = round(winrate)
-        return winrate_round
+        self.winrate = winrate_round
+        return self.winrate
 
     # --- THESE FUNCTIONS BELLOW DON'T WORK ON MOMENT --- #
     def get_id_best_champion_account_by_puuid(self):
@@ -159,6 +161,8 @@ class ApiRiot:
         return champion_name
 
     def get_url_splash_art_best_champ_by_id_champ(self):
+        self.get_id_best_champion_account_by_puuid()
+        self.get_name_by_champion_id()
         url_image_champ_splash = f"http://ddragon.leagueoflegends.com/cdn/img/champion/splash/{self.nick_name_best_champ}_0.jpg"
         self.url_splash_art_best_champ = url_image_champ_splash
         return url_image_champ_splash

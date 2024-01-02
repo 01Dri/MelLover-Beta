@@ -32,7 +32,7 @@ class LolServices:
         except FailedGetSummonerByNick:
             await self.view_embeds.get_embed_account_lol_nick_not_exist(ctx, self.nick)
         except SummonerAccountNotHaveInfoSoloDuoQueue:
-            await self.view_embeds.get_embed_account_lol_without_solo_duo_info(ctx, self.nick, self.lol_api_services.get_level_account_by_nick(), f"https://www.op.gg/summoners/br/{self.nick}")
+            await self.view_embeds.get_embed_account_lol_without_solo_duo_info(ctx, self.nick, self.lol_api_services.get_level_account_by_nick(), f"https://www.p.gg/summoners/br/{self.nick}", self.lol_api_services.get_url_splash_art_best_champ_by_id_champ())
 
     def parser_nick_command(self, ctx):
         parts = ctx.content.split()

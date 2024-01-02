@@ -41,30 +41,18 @@ class ApiRioIntegrationTests(unittest.TestCase):
 
     def test_get_all_account_info(self):
         api_riot_lol = ApiRiot("Drikill", TOKEN_RIOT)
-        json_result = api_riot_lol.get_account_all_info()
-        global tier
-        for item in json_result:
-            if item.get('queueType') == 'RANKED_SOLO_5x5':
-                tier = item.get('tier')
-        self.assertEqual("PLATINUM", tier)
+        hash_info_result = api_riot_lol.get_all_info_account_league()
+        self.assertEqual("PLATINUM", hash_info_result['tier'])
 
     def test_get_all_account_info2(self):
         api_riot_lol = ApiRiot("Raposy", TOKEN_RIOT)
-        json_result = api_riot_lol.get_account_all_info()
-        global tier
-        for item in json_result:
-            if item.get('queueType') == 'RANKED_SOLO_5x5':
-                tier = item.get('tier')
-        self.assertEqual("PLATINUM", tier)
+        hash_info_result = api_riot_lol.get_all_info_account_league()
+        self.assertEqual("PLATINUM", hash_info_result['tier'])
 
     def test_get_all_account_info3(self):
         api_riot_lol = ApiRiot("130722", TOKEN_RIOT)
-        json_result = api_riot_lol.get_account_all_info()
-        global tier
-        for item in json_result:
-            if item.get('queueType') == 'RANKED_SOLO_5x5':
-                tier = item.get('tier')
-        self.assertEqual("PLATINUM", tier)
+        hash_info_result = api_riot_lol.get_all_info_account_league()
+        self.assertEqual("PLATINUM", hash_info_result['tier'])
 
     def test_get_id_maestry_champ_by_puuid(self):
         api_riot_lol = ApiRiot("Drikill", TOKEN_RIOT)
@@ -95,11 +83,9 @@ class ApiRioIntegrationTests(unittest.TestCase):
     def test_exception_account_without_info_solo_queue_account(self):
         api_riot_lol = ApiRiot("Dri", TOKEN_RIOT)  # Account Dri not have a info on soloqueue
         with self.assertRaises(SummonerAccountNotHaveInfoSoloDuoQueue) as context:
-            api_riot_lol.parser_info_json_to_hash_map()
+            api_riot_lol.get_account_tier_rank_and_pdl()
         self.assertEqual(str(context.exception),
                          "Summoner not have a solo queue info")  # 404 data not found
-
-    ## Missing test get_id_champ, get_name_champ and get_entity_account
 
     def test_exception_invalid_token_request(self):
         with self.assertRaises(RiotTokenInvalid):
