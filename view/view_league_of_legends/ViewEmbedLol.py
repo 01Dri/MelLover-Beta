@@ -42,6 +42,16 @@ class ViewEmbedLol:
         embed.set_image(url="https://thc.bing.com/th/id/OIG.8PhgK58TGnckz_lgvXvq?pid=ImgGn")  # AI IMAGE
         await ctx.reply(embed=embed)
 
+    async def get_embed_account_lol_without_solo_duo_info(self, ctx, nick):
+        nick = self.parser_nick_char(nick)
+        embed = discord \
+            .Embed(
+            title='LEAGUE OF LEGENDS ACCOUNT', description="ERROR INFO", color=COLOR_FOR_EMBEDS_ERROR)
+        embed.add_field(name=f"Conta não possui jogos ranqueados SOLO/DUO!!!", value=f"A conta com o nick **{nick}** ainda não fez sua MD5",
+                        inline=False)
+        embed.set_image(url="https://thc.bing.com/th/id/OIG.8PhgK58TGnckz_lgvXvq?pid=ImgGn")  # AI IMAGE
+        await ctx.reply(embed=embed)
+
     def parser_nick_with_space(self, nick):
         if "%20" in nick:
             return nick.replace("%20", " ").upper()
